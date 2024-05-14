@@ -48,7 +48,7 @@ const errorMessage = ref(null)
 // watch the params of the route to fetch the data again
 onBeforeMount(async () => {
   console.log(route.params)
-  await fetchData(route.params.id)
+  await fetchData(route.query.userId)
 })
 
 

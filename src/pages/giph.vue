@@ -14,7 +14,8 @@
           </v-col>
           <v-col cols="12" class="d-flex align-center justify-center pa-10">
             <span class="text-blue text-decoration-underline cursor-pointer text-h4"
-              @click="router.push(`/user/${giphy?.id}`)">{{ giphy?.user?.username || 'No username' }}</span>
+              @click="router.push({ path: '/user', query: { userId: giphy?.id } })">
+              {{ giphy?.user?.username || 'No username' }}</span>
           </v-col>
         </v-row>
       </v-container>
@@ -33,7 +34,7 @@ const giphy = ref({})
 const errorMessage = ref(null)
 // watch the params of the route to fetch the data again
 onBeforeMount(async () => {
-  await fetchData(route.params.id)
+  await fetchData(route.query.id)
 })
 
 

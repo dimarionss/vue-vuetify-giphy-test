@@ -25,7 +25,7 @@
           <v-col v-for="giph, idx in giphy" :key="idx" cols="4">
             <v-img :width="giph?.images?.fixed_height?.width" :height="giph?.images?.fixed_height?.height"
               aspect-ratio="16/9" cover :src="giph?.images?.fixed_height?.url"
-              @click="router.push(`/${giph?.id}`)"></v-img>
+              @click="router.push({ path: '/giph', query: { id: giph?.id } })"></v-img>
             <v-btn block color="white" height="50px" @click="shareData(giph?.url, giph?.title)">
               <v-avatar rounded="0" size="50" class="pa-1">
                 <v-img width="100%" cover src="/share.svg"></v-img>

@@ -14,11 +14,11 @@ const routes = [
   },
   {
     name: "Gif",
-    path: "/:id",
+    path: "/giph",
   },
   {
     name: "User",
-    path: "/user/:id",
+    path: "/user",
   },
 ];
 
