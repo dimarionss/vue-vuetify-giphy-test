@@ -52,7 +52,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Pagination from '../components/Pagination.vue';
 const route = useRoute()
 const router = useRouter()
-const onPage = ref(3)
+const onPage = ref(15)
 const page = ref(1)
 const searchData = ref()
 const giphyObject = ref(null)
