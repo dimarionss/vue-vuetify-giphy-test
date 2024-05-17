@@ -19,15 +19,15 @@
         <v-row class="pa-4">
           <v-col cols="12" class="d-flex align-center justify-center">
             <v-avatar size="300" class="ml-4" @click="router.go(-1)">
-              <v-img width="100%" height="auto" cover :src="giphy?.user?.avatar_url"></v-img>
+              <v-img width="100%" height="auto" cover :src="GIPHY_CURRENT?.user?.avatar_url"></v-img>
             </v-avatar>
           </v-col>
           <v-col cols="12" md="4" class="d-flex align-center justify-center mx-auto">
-            <span class="text-white cursor-pointer text-h4">{{ giphy?.user?.username }}</span>
+            <span class="text-white cursor-pointer text-h4">{{ GIPHY_CURRENT?.user?.username }}</span>
           </v-col>
           <v-col cols="12" class="d-flex align-center justify-center pa-10">
-            <a class="text-blue text-decoration-underline cursor-pointer text-h4" :href="giphy?.user?.profile_url"
-              target="__blank">GIT PAGE</a>
+            <a class="text-blue text-decoration-underline cursor-pointer text-h4"
+              :href="GIPHY_CURRENT?.user?.profile_url" target="__blank">GIT PAGE</a>
           </v-col>
         </v-row>
       </v-container>
@@ -36,41 +36,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, onBeforeMount } from 'vue'
+import { storeToRefs } from 'pinia'
+import { onBeforeMount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-
-
+import { useGiphy } from "../store/Giphy"
+const { GIPHY_CURRENT } = storeToRefs(useGiphy())
+const { fetchDataFromId } = useGiphy()
 const route = useRoute()
 const router = useRouter()
-const giphyObject = ref(null)
-const giphy = ref({})
-const errorMessage = ref(null)
-// watch the params of the route to fetch the data again
+
 onBeforeMount(async () => {
   console.log(route.params)
-  await fetchData(route.query.userId)
-})
-
-
-async function fetchData(id: string) {
-  const url = new URL(`https://api.giphy.com/v1/gifs/${id}`);
-  url.searchParams.append('api_key', 'T8bTqT96o9S5wW05OrDLyBa9jHBfWiaL');
-  url.searchParams.append('rating', 'g');
-  try {
-    await fetch(url)
-      .then((response) => {
-        response.json().then(async (data) => {
-          if (data?.meta?.status === 200) {
-            giphyObject.value = data;
-            giphy.value = data.data;
-          } else {
-            errorMessage.value = data?.meta?.msg
-          }
-          console.log(giphyObject.value)
-        });
-      })
-  } catch (error) {
-    console.error(error);
+  console.log(GIPHY_CURRENT.value)
+  if (!GIPHY_CURRENT.value) {
+    await fetchDataFromId(route.query.userId)
   }
-}
+
+})
 </script>

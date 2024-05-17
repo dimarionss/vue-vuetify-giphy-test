@@ -22,7 +22,7 @@
     <v-main>
       <v-container>
         <v-row>
-          <v-col v-for="giph, idx in giphy" :key="idx" cols="4">
+          <v-col v-for="giph, idx in GIPHY_LIST" :key="idx" cols="4">
             <v-img :width="giph?.images?.fixed_height?.width" :height="giph?.images?.fixed_height?.height"
               aspect-ratio="16/9" cover :src="giph?.images?.fixed_height?.url"
               @click="router.push({ path: '/giph', query: { id: giph?.id } })"></v-img>
@@ -32,12 +32,12 @@
               </v-avatar>
             </v-btn>
           </v-col>
-          <v-col cols="12" v-if="errorMessage" class="d-flex align-center justify-center pa-10">
-            <span class="text-error">{{ errorMessage }}</span>
+          <v-col cols="12" v-if="ERROR_MESSAGE" class="d-flex align-center justify-center pa-10">
+            <span class="text-error">{{ ERROR_MESSAGE }}</span>
           </v-col>
-          <v-col cols="12" v-if="Object.keys(paginationData).length > 0">
+          <v-col cols="12" v-if="Object.keys(PAGINATION_DATA).length > 0">
             <Pagination v-model:on-page="pageOn" v-model:pagination="pagination"
-              :total-pages="paginationData ? Math.ceil(paginationData?.total_count / paginationData?.count) : 1"
+              :total-pages="PAGINATION_DATA ? Math.ceil(PAGINATION_DATA?.total_count / PAGINATION_DATA?.count) : 1"
               :page="page" />
           </v-col>
         </v-row>
@@ -47,21 +47,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useGiphy } from "../store/Giphy"
+import { computed, onBeforeMount } from 'vue'
+import { useRouter } from 'vue-router'
 import Pagination from '../components/Pagination.vue';
-const route = useRoute()
+const { page, onPage, searchData, GIPHY_LIST, ERROR_MESSAGE, PAGINATION_DATA } = storeToRefs(useGiphy())
+const { fetchData } = useGiphy()
 const router = useRouter()
-const onPage = ref(15)
-const page = ref(1)
-const searchData = ref()
-const giphyObject = ref(null)
-const giphy = ref(null)
-const paginationData = ref({})
-const errorMessage = ref(null)
-// watch the params of the route to fetch the data again
-watch(() => route.params.id, fetchData, { immediate: true })
 
+
+onBeforeMount(async () => {
+  await fetchData()
+})
 
 
 const pagination = computed({
@@ -73,6 +71,7 @@ const pagination = computed({
     await fetchData()
   }
 })
+
 const pageOn = computed({
   get() {
     return onPage.value
@@ -82,6 +81,7 @@ const pageOn = computed({
     await fetchData()
   }
 })
+
 const searchGif = computed({
   get() {
     return searchData.value
@@ -101,60 +101,6 @@ async function shareData(url: string, text: string) {
     await navigator.share(data);
   } catch (err) {
     console.error(err);
-  }
-}
-
-
-async function fetchData() {
-  const url = new URL('https://api.giphy.com/v1/gifs/search');
-  url.searchParams.append('api_key', 'T8bTqT96o9S5wW05OrDLyBa9jHBfWiaL');
-  url.searchParams.append('q', searchData.value);
-  url.searchParams.append('limit', String(onPage.value));
-  url.searchParams.append('offset', String(page.value));
-  try {
-    await fetch(url)
-      .then((response) => {
-        response.json().then(async (data) => {
-          if (data?.meta?.status === 200) {
-            if (data?.data.length > 0) {
-              giphyObject.value = data;
-              giphy.value = data.data;
-              paginationData.value = data.pagination;
-            } else {
-              await fetchStaticData()
-            }
-
-          } else {
-            errorMessage.value = data?.meta?.msg
-          }
-
-          console.log(giphyObject.value)
-        });
-      })
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-async function fetchStaticData() {
-  const url = new URL('https://api.giphy.com/v1/stickers/random');
-  url.searchParams.append('api_key', 'T8bTqT96o9S5wW05OrDLyBa9jHBfWiaL');
-  url.searchParams.append('tag', 'Not Found');
-  url.searchParams.append('rating', 'g');
-  try {
-    await fetch(url)
-      .then((response) => {
-        response.json().then((data) => {
-          if (data?.meta?.status === 200) {
-            giphy.value = [data.data];
-            paginationData.value = {}
-          } else {
-            errorMessage.value = data?.meta?.msg
-          }
-        });
-      })
-  } catch (error) {
-    console.error(error);
   }
 }
 </script>
