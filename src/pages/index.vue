@@ -65,16 +65,6 @@ const pageOn = computed({
   }
 })
 
-const searchGif = computed({
-  get() {
-    return searchData.value
-  },
-  async set(value: string) {
-    searchData.value = value
-    await fetchData()
-  }
-})
-
 async function shareData(url: string, text: string) {
   try {
     const data = {
